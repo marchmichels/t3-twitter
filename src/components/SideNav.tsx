@@ -27,3 +27,6 @@ export function SideNav() {
         </nav>
     );
 };
+
+
+//1:25:30 in video

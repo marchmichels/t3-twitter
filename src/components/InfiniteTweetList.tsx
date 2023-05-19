@@ -4,6 +4,7 @@ import { ProfileImage } from "./ProfileImage"
 import { useSession } from "next-auth/react"
 import { VscHeart, VscHeartFilled } from "react-icons/vsc"
 import { IconHoverEffect } from "./IconHoverEffect"
+import { api } from "~/utils/api"
 
 type Tweet = {
     id: string
@@ -16,14 +17,14 @@ type Tweet = {
 }
 
 type InfiniteTweetListProps = {
-    isLoading: boolean
-    isError: boolean
-    hasMore: boolean
-    fetchNewTweets: () => Promise<unknown>
-    tweets?: Tweet[]
-}
+    isLoading: boolean;
+    isError: boolean;
+    hasMore: boolean | undefined;
+    fetchNewTweets: () => Promise<unknown>;
+    tweets?: Tweet[];
+};
 
-export function InfiniteTweetList({ tweets, isError, isLoading, fetchNewTweets, hasMore }: InfiniteTweetListProps) {
+export function InfiniteTweetList({ tweets, isError, isLoading, fetchNewTweets, hasMore = false }: InfiniteTweetListProps) {
     if (isLoading) return <h1>Loading...</h1>
     if (isError) return <h1>Error...</h1>
     if (tweets == null) return null
@@ -51,6 +52,44 @@ export function InfiniteTweetList({ tweets, isError, isLoading, fetchNewTweets, 
 const dateTimeFormatter = new Intl.DateTimeFormat(undefined, { dateStyle: "short" })
 
 function TweetCard({ id, user, content, createdAt, likeCount, likedByMe }: Tweet) {
+
+    const trpcUtils = api.useContext()
+
+    const toggleLike = api.tweet.toggleLike.useMutation({
+        onSuccess: ({ addedLike }) => {
+            const updateData: Parameters<typeof trpcUtils.tweet.infiniteFeed.setInfiniteData>[1] = (oldData) => {
+                if (oldData == null) return
+
+                const countModifier = addedLike ? 1 : -1
+
+                return {
+                    ...oldData,
+                    pages: oldData.pages.map(page => {
+                        return {
+                            ...page,
+                            tweets: page.tweets.map(tweet => {
+                                if (tweet.id === id) {
+                                    return {
+                                        ...tweet,
+                                        likeCount: tweet.likeCount + countModifier,
+                                        likedByMe: addedLike
+                                    }
+                                }
+
+                                return tweet
+                            })
+                        }
+                    })
+                }
+            }
+            trpcUtils.tweet.infiniteFeed.setInfiniteData({}, updateData);
+        },
+    });
+
+    function handleToggleLike() {
+        toggleLike.mutate({ id })
+    }
+
     return (
 
         <li className="flex gap-4 border-b px-4 py-4">
@@ -67,7 +106,7 @@ function TweetCard({ id, user, content, createdAt, likeCount, likedByMe }: Tweet
 
                 </div>
                 <p className="whitespace-pre-wrap">{content}</p>
-                <HeartButton likedByMe={likedByMe} likeCount={likeCount} />
+                <HeartButton onClick={handleToggleLike} isLoading={toggleLike.isLoading} likedByMe={likedByMe} likeCount={likeCount} />
             </div>
 
         </li>
@@ -77,11 +116,13 @@ function TweetCard({ id, user, content, createdAt, likeCount, likedByMe }: Tweet
 };
 
 type HeartButtonProps = {
+    onClick: () => void
+    isLoading: boolean
     likedByMe: boolean
     likeCount: number
 }
 
-function HeartButton({ likedByMe, likeCount }: HeartButtonProps) {
+function HeartButton({ isLoading, onClick, likedByMe, likeCount }: HeartButtonProps) {
 
     const session = useSession()
     const HeartIcon = likedByMe ? VscHeartFilled : VscHeart
@@ -96,7 +137,10 @@ function HeartButton({ likedByMe, likeCount }: HeartButtonProps) {
     };
 
     return (
-        <button className={`group -ml-2 items-center gap-1 self-start flex transition-colors duration-200 ${likedByMe ? "text-red-500" : "text-gray-500 hover:text-red-500 focus-visible:text-red-500"}`}>
+        <button
+            disabled={isLoading}
+            onClick={onClick}
+            className={`group -ml-2 items-center gap-1 self-start flex transition-colors duration-200 ${likedByMe ? "text-red-500" : "text-gray-500 hover:text-red-500 focus-visible:text-red-500"}`}>
 
             <IconHoverEffect red>
                 <HeartIcon className={`transition-colors duration-200 ${likedByMe

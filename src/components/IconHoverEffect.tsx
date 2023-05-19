@@ -14,4 +14,4 @@ export function IconHoverEffect({ children, red = false }: IconHoverEffectProps)
             {children}
         </div>
     );
-};
+}

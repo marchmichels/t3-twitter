@@ -16,7 +16,7 @@ export function NewTweetForm() {
 
     return <Form />;
 
-};
+}
 
 function Form() {
     const session = useSession();

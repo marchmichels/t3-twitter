@@ -118,7 +118,7 @@ function TweetCard({ id, user, content, createdAt, likeCount, likedByMe }: Tweet
 
 
     );
-};
+}
 
 type HeartButtonProps = {
     onClick: () => void
@@ -139,7 +139,7 @@ function HeartButton({ isLoading, onClick, likedByMe, likeCount }: HeartButtonPr
                 <span>{likeCount}</span>
             </div>
         )
-    };
+    }
 
     return (
         <button

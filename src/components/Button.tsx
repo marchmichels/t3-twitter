@@ -20,4 +20,4 @@ export function Button({
     return (
         <button className={`rounded-full transition-colors duration-200 disabled:cursor-not-allowed disabled:opacity-50 text-white ${sizeClasses} ${colorClasses} ${className}`} {...props}></button>
     );
-};
+}

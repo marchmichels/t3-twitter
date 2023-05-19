@@ -12,4 +12,4 @@ export function ProfileImage({ src, className = ""}: ProfileImageProps) {
                 {src == null ? <VscAccount className="h-full w-full" /> : <Image src={src} alt="Profile Image" quality={100} fill />}
         </div>
     );
-};
+}

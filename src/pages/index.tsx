@@ -7,7 +7,6 @@ import { api } from "~/utils/api";
 
 const TABS = ["Recent", "Following"] as const
 
-
 const Home: NextPage = () => {
   const [selectedTab, setSelectedTab] = useState<(typeof TABS)[number]>("Recent")
   const session = useSession()
@@ -45,8 +44,6 @@ function RecentTweets() {
 
     />
 
-
-
   )
 }
 
@@ -66,10 +63,7 @@ function FollowingTweets() {
 
     />
 
-
-
   )
 }
 
 export default Home;
-

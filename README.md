@@ -1,3 +1,7 @@
+## Twitter Clone
+This project is based off work by Kyle at Web Dev Simplified.
+https://youtu.be/jqVm5_G1ZEE
+
 # Create T3 App
 
 This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
